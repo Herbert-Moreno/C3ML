@@ -1,5 +1,5 @@
-module c3learning::utils::vectorarray {Type};
-import c3learning::utils::interfaces, c3learning::utils::enums;
+module c3ml::utils::vectorarray {Type};
+import c3ml::utils::interfaces, c3ml::utils::enums;
 import std::core::mem, std::io;
 
 struct Vector(interfaces::DynamicArray{Type}) 

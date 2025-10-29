@@ -1,4 +1,4 @@
-module c3learning::utils::interfaces{Type};
+module c3ml::utils::interfaces{Type};
 
 interface DynamicArray {
     fn void? push(Type item);

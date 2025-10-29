@@ -1,6 +1,6 @@
 {
   // Language version of C3.
-  "langrev": "0.7.3",
+  "langrev": "0.7.6",
   // Warnings used for all targets.
   "warnings": [ "no-unused" ],
   // Directories where C3 library files may be found.
@@ -8,7 +8,7 @@
   // Libraries to use for all targets.
   "dependencies": [ ],
   // Authors, optionally with email.
-  "authors": [ "John Doe" ],
+  "authors": [ "Herbert-Moreno" ],
   // Version using semantic versioning.
   "version": "0.0.1-SNAPSHOT",
   // Sources compiled for all targets.
@@ -27,7 +27,7 @@
   // "target": "windows-x64",
   // Targets.
   "targets": {
-    "C3learning": {
+    "c3ml": {
       // Executable or library.
       "type": "executable",
       // Additional libraries, sources

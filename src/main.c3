@@ -1,5 +1,5 @@
-module c3learning;
-import c3learning::linear_models::perceptron, c3learning::utils::vectorarray;
+module c3ml;
+import c3ml::linear_models::perceptron, c3ml::utils::vectorarray;
 import std::io;
 
 fn int main(String[] args)

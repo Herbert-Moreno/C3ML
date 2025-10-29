@@ -1,5 +1,5 @@
-module c3learning::linear_models::linear_pattern;
-import c3learning::utils::vectorarray;
+module c3ml::linear_models::linear_pattern;
+import c3ml::utils::vectorarray;
 
 struct LinearModel {
     String version;
