@@ -1,32 +1,46 @@
-module c3ml::utils::vectorarray {Type};
-import c3ml::utils::interfaces, c3ml::utils::enums;
+module c3ml::collections::vector <Type>;
+import c3ml::collections::interfaces, c3ml::collections::enums;
 import std::core::mem, std::io;
 
-struct Vector(interfaces::DynamicArray{Type}) 
-{
+struct Vector (Printable) {
     usz size;
+    Allocator alloc;
     Type* items;
 }
 
-macro Vector? @newVector(Type[] array)
+fn usz~ Vector.to_format(&self, Formatter* formatter) @dynamic
 {
-    /*
-    Create and return an Vector of length and items
-    @param Type[] array: `input array.`
-    @require array.len > 0
-    */
+	switch (self.size)
+	{
+		case 0:
+			return formatter.print("()")!;
+		default:
+			usz n = formatter.print("(")!;
+			for (int i; i < self.size; i++)
+			{
+				if (i != 0) formatter.print(", ")!;
+				n += formatter.printf("%s", self.items[i])!;
+			}
+			n += formatter.print(")")!;
+			return n;
+	}
+}
+
+fn void~ Vector.init(&self, Allocator alloc, Type[] init_values = {})
+{
     Vector new_Vector;
 
-    Type* new_items;
+    Type*? new_items;
     usz new_size_bytes;
     usz array_size = array.len;
 
     if (array_size > 0) {
         new_size_bytes = array_size * Type.sizeof;
 
-        new_items = mem::malloc(new_size_bytes);
+        new_items = (Type*) allocator::malloc_try(allocator::mem , new_size_bytes);
 
-        if (new_items == null) {
+        if (catch new_items) {
+            io::printn("[ERROR] Malloc_try Failed");
             return enums::MEMORY_ALLOC_FAILED?;
         }
 
@@ -47,47 +61,37 @@ macro Vector? @newVector(Type[] array)
     return new_Vector;
 }
 
+<*
+ Expands the Vector +1 size every item pushed into the Vector,
+ and inserts the item at the end of the vector
+*>
 fn void? Vector.push(&self, Type item) @dynamic
 {
-    /*
-    Expands the Vector +1 size every item pushed into the Vector,
-    and inserts the item at the end of the vector
-    @param Type item: `input item.`
-    @require item != null.
-    */
-    Type* new_items;
+    Type*? new_items;
     usz new_size_bytes;
     usz new_size = self.size + 1;
 
     new_size_bytes = new_size * Type.sizeof;
 
-    new_items = mem::malloc(new_size_bytes);
+    new_items = (Type*)allocator::realloc_try(allocator::mem, self.items, new_size_bytes);
 
-    if (new_items == null) {
+    if (catch new_items) {
+        io::printn("[ERROR] Realloc_try Failed");
         return enums::MEMORY_ALLOC_FAILED?;
     }
 
-    if (self.size > 0) {
-        for (int i=0; i < new_size; i++) {
-            new_items[i] = self.items[i];
-        }
-    }
     new_items[new_size - 1] = item;
-
     self.free();
-    self.size = new_size;
     self.items = new_items;
+    self.size = new_size;
     new_items = null;
 }
 
-fn void? Vector.updateAt(&self, usz index, Type item) @dynamic
+<*
+ Updates an item at the index.
+*>
+fn void? Vector.update_at(&self, usz index, Type item) @dynamic
 {
-    /*
-    Updates an item at the index.
-    @param usz index: `index of the item to update.`
-    @param Type item: `item to push into the index.`
-    @require self.size > 0
-    */
     if (self.size > 0) {
         for (int i=0; i < self.size; i++) {
             if (i == index) {
@@ -99,19 +103,20 @@ fn void? Vector.updateAt(&self, usz index, Type item) @dynamic
     }
 }
 
-fn usz Vector.len(&self) @dynamic @operator(len)
+<*
+ Returns the current size of the vector
+*>
+fn usz Vector.len(&self) @dynamic
 {
     return self.size;
 }
 
+<*
+ Iterates over the items and gets an item from certain index,
+ if item not found returns 0;
+*>
 fn Type? Vector.get(&self, usz index) @dynamic @operator([])
 {
-    /*
-    Iterates over the items and gets an item from certain index,
-    if item not found returns 0;
-    @param usz index: `index of the item.`
-    @require index < self.size
-    */
     if (index < self.size) {
         return self.items[index];
     } else {
@@ -119,13 +124,11 @@ fn Type? Vector.get(&self, usz index) @dynamic @operator([])
     }
 }
 
-fn void? Vector.removeAt(&self, usz index) @dynamic
+<*
+ Removes an item from certain index, does not decrease the Vector Size
+*>
+fn void? Vector.remove_at(&self, usz index) @dynamic
 {
-    /*
-    Removes an item from certain index, does not decrease the Vector Size
-    @param usz index: `index of the item.`
-    @require self.size > 0
-    */
     if (self.size > 0) {
         for (int i=0; i < self.size; i++) {
             if (i == index) {
@@ -137,15 +140,13 @@ fn void? Vector.removeAt(&self, usz index) @dynamic
     }
 }
 
+<*
+ Removes the last item of the vector and returns it;
+*>
 fn Type? Vector.pop(&self) @dynamic
 {
-    /*
-    Removes the last item of the vector and returns it;
-    @param : ``
-    @require self.size > 0
-    */
     Type last_item;
-    Type* new_items;
+    Type*? new_items;
     usz new_size_bytes;
     usz new_size = self.size - 1;
 
@@ -154,9 +155,10 @@ fn Type? Vector.pop(&self) @dynamic
 
         new_size_bytes = new_size * Type.sizeof;
 
-        new_items = mem::malloc(new_size_bytes);
+        new_items = (Type*) allocator::realloc_try(allocator::mem, self.items, new_size_bytes);
 
-        if (new_items == null) {
+        if (catch new_items) {
+            io::printn("[ERROR] Realloc_try Failed");
             return enums::MEMORY_ALLOC_FAILED?;
         }
 
@@ -175,13 +177,11 @@ fn Type? Vector.pop(&self) @dynamic
     return last_item;
 }
 
+<*
+ Iterates over the Vector and Checks if the item is in the Vector
+*>
 fn bool? Vector.has(&self, Type item) @dynamic
 {
-    /*
-    Iterates over the Vector and Checks if the item is in the Vector
-    @param usz item: `item to search.`
-    @require self.size > 0
-    */
     if (self.size > 0) {
         for (int i=0; i < self.size; i++) {
             if (self.items[i] == item) {
@@ -194,14 +194,12 @@ fn bool? Vector.has(&self, Type item) @dynamic
     }
 }
 
-fn void Vector.printAll(&self) @dynamic
+<*
+ Prints all data in the vector,
+ do a lil bit of witchery to discover the type format of the data.
+*>
+fn void Vector.print_all(&self) @dynamic
 {
-    /*
-    Prints all data in the vector,
-    do a lil bit of witchery to discover the type format of the data.
-    @param : ``
-    @require 
-    */
     for (int i = 0; i < self.size; i++) {
         switch(Type) {
             case int.typeid:
@@ -220,15 +218,13 @@ fn void Vector.printAll(&self) @dynamic
     }
 }
 
+<*
+ Free the items pointer.
+*>
 fn bool Vector.free(&self) @dynamic
 {
-    /*
-    Free the items pointer.
-    @param : ``
-    @require self.items != null
-    */
     if (self.items != null) {
-        mem::free(self.items);
+        free(self.items);
         self.items = null;
         return true;
     } else {
@@ -237,6 +233,9 @@ fn bool Vector.free(&self) @dynamic
     }
 }
 
+<*
+ Returns the dot product of two vectors of same type
+*>
 fn Type Vector.dotprod(&self, Vector{Type} other) @operator(+)
 {
     if (self.size == other.size) {

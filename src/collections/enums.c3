@@ -1,4 +1,4 @@
-module c3ml::utils::enums;
+module c3ml::collections::enums;
 
 faultdef TYPE_MISS_MATCH,
     MEMORY_ALLOC_FAILED,
