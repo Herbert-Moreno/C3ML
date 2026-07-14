@@ -1,14 +1,16 @@
 const ZIML = @This();
 
 const Patterns = @import("utils/Patterns.zig");
-pub const ModelMeta = Patterns.ModelMeta;
+pub const LinearModel = Patterns.LinearModel;
+pub const Layer = Patterns.Layer;
 
 // StepFunctions
 const Activation = @import("utils/ActivationFunctions.zig");
-pub const BinaryStep = Activation.BinaryStep;
-pub const LinearFunction = Activation.LinearFunction;
-pub const Sigmoid = Activation.Sigmoid;
-pub const Tanh = Activation.Tanh;
-pub const ReLU = Activation.ReLU;
+pub const ActivationFunction = Activation.ActivationFunction;
+pub const ActivationArgs = Activation.ActivationArgs;
+pub const ActivationKind = Activation.ActivationKind;
+
+// Math
+pub const Vector = @import("math/Vector.zig").Create;
 
 pub const Perceptron = @import("linear_classifiers/Perceptron.zig").Perceptron;
