@@ -6,13 +6,26 @@ pub fn LinearModel(comptime Input: type, comptime Output: type) type {
         layers: Vector(Layer),
         epochs: usize,
         w: ZIML.Vector(Input),
-        predictfn: *const fn (self: *anyopaque, X: Vector(Input), activationFn: ZIML.ActivationKind) Output,
-        fitfn: *const fn (self: *Self) void,
+        predictfn: ?*const fn (self: *anyopaque, X: Vector(Input), activationFn: ZIML.ActivationKind) Output,
+        fitfn: ?*const fn (self: *Self) void,
 
         const Self = @This();
 
         pub fn predict(self: *Self, X: Vector(Input), activationFn: ZIML.ActivationKind) Output {
-            return self.predictfn(self, X, activationFn);
+            if (self.predictfn) |predictfn| {
+                return predictfn(self, X, activationFn);
+            }
+            std.debug.print("Not Implemented Yet", .{});
+            @panic("error");
+        }
+
+        pub fn fit(self: *Self) void {
+            if (self.fitfn) |fitfn| {
+                fitfn(self);
+                return;
+            }
+            std.debug.print("Not Implemented Yet", .{});
+            @panic("error");
         }
 
         pub fn deinit(self: *Self) void {

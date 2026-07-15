@@ -26,7 +26,7 @@ pub fn Perceptron(comptime T: type, allocator: std.mem.Allocator, epochs: usize,
         })),
         .w = .empty,
         .predictfn = gen.predict,
-        .fitfn = undefined
+        .fitfn = null
     };
 }
 
